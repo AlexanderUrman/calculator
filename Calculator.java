@@ -45,13 +45,9 @@ public class Calculator {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Введите первое число (1-10 или I-X): ");
+        System.out.println("Введите выражение: ");
         String firstInput = scanner.next().toUpperCase();
-
-        System.out.println("Введите операцию (+, -, *, /): ");
         char operation = scanner.next().charAt(0);
-
-        System.out.println("Введите второе число (1-10 или I-X): ");
         String secondInput = scanner.next().toUpperCase();
 
         boolean isRoman = firstInput.matches("[IVX]+") && secondInput.matches("[IVX]+");
