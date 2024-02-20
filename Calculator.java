@@ -1,105 +1,84 @@
-
+import java.util.Arrays;
 import java.util.Scanner;
-import java.util.HashMap;
 
 public class Calculator {
 
-    private static final HashMap<Character, Integer> romanToArabic = new HashMap<>();
-    static {
-        romanToArabic.put('I', 1);
-        romanToArabic.put('V', 5);
-        romanToArabic.put('X', 10);
+
+    static String[] romanNums = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};
+    static int[] arabicNums = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String line = sc.nextLine();
+        try {
+            String[] parts = line.split(" ");
+            if (parts.length != 3)
+                throw new IllegalArgumentException("Введенная строка не соответствует формату 'число операция число'");
+
+            boolean isRoman = isRoman(parts[0]) && isRoman(parts[2]);
+
+            if (isRoman(parts[0]) != isRoman(parts[2]))
+                throw new IllegalArgumentException("Числа разных типов");
+
+            int num1 = isRoman ? romanToArabic(parts[0]) : Integer.parseInt(parts[0]);
+            int num2 = isRoman ? romanToArabic(parts[2]) : Integer.parseInt(parts[2]);
+
+            if (num1 < 1 || num1 > 10 || num2 < 1 || num2 > 10)
+                throw new IllegalArgumentException("Числа вне диапазона от 1 до 10");
+
+            switch (parts[1]) {
+                case "+":
+                    printResult(num1 + num2, isRoman);
+                    break;
+                case "-":
+                    printResult(num1 - num2, isRoman);
+                    break;
+                case "*":
+                    printResult(num1 * num2, isRoman);
+                    break;
+                case "/":
+                    printResult(num1 / num2, isRoman);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Некорректный знак операции");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private static int romanToArabic(String roman) {
-        int result = 0;
-        for (int i = 0; i < roman.length(); i++) {
-            if (i > 0 && romanToArabic.get(roman.charAt(i)) > romanToArabic.get(roman.charAt(i - 1))) {
-                result += romanToArabic.get(roman.charAt(i)) - 2 * romanToArabic.get(roman.charAt(i - 1));
-            } else {
-                result += romanToArabic.get(roman.charAt(i));
-            }
-        }
-        return result;
+    private static boolean isRoman(String str) {
+        return Arrays.asList(romanNums).contains(str);
+    }
+
+    private static int romanToArabic(String str) {
+        return Arrays.asList(romanNums).indexOf(str) + 1;
+    }
+
+    private static void printResult(int res, boolean isRoman) {
+        if (!isRoman || res > 0)
+            System.out.println(isRoman ? arabicToRoman(res) : res);
+        else
+            throw new IllegalArgumentException("Результат не может быть меньше 1 для римских чисел");
     }
 
     private static String arabicToRoman(int number) {
-        if (number <= 0) {
-            return "Результат не может быть представлен в римских цифрах";
-        }
+        String[] romanCharacters = { "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" };
+        int[] arabicNumbers = { 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };
 
-        String[] romanNumerals = {"X", "IX", "V", "IV", "I"};
-        int[] romanValues = {10, 9, 5, 4, 1};
-        StringBuilder roman = new StringBuilder();
+        StringBuilder result = new StringBuilder();
 
-        for (int i = 0; i < romanValues.length; i++) {
-            while (number >= romanValues[i]) {
-                number -= romanValues[i];
-                roman.append(romanNumerals[i]);
-            }
-        }
-
-        return roman.toString();
-    }
-
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Введите выражение: ");
-        String firstInput = scanner.next().toUpperCase();
-        char operation = scanner.next().charAt(0);
-        String secondInput = scanner.next().toUpperCase();
-
-        boolean isRoman = firstInput.matches("[IVX]+") && secondInput.matches("[IVX]+");
-
-        int firstNumber, secondNumber;
-
-        if (isRoman) {
-            firstNumber = romanToArabic(firstInput);
-            secondNumber = romanToArabic(secondInput);
-        } else {
-            firstNumber = Integer.parseInt(firstInput);
-            secondNumber = Integer.parseInt(secondInput);
-        }
-
-        if (firstNumber < 1 || firstNumber > 10 || secondNumber < 1 || secondNumber > 10) {
-            System.out.println("Одно из чисел вне допустимого диапазона (1-10).");
-            return;
-        }
-
-        int result = 0;
-        boolean isValidOperation = true;
-
-        switch (operation) {
-            case '+':
-                result = firstNumber + secondNumber;
-                break;
-            case '-':
-                result = firstNumber - secondNumber;
-                break;
-            case '*':
-                result = firstNumber * secondNumber;
-                break;
-            case '/':
-                if(secondNumber == 0) {
-                    System.out.println("На ноль делить нельзя.");
-                    isValidOperation = false;
-                } else {
-                    result = firstNumber / secondNumber;
-                }
-                break;
-            default:
-                System.out.println("Неподдерживаемая операция.");
-                isValidOperation = false;
-                break;
-        }
-
-        if (isValidOperation) {
-            if (isRoman) {
-                System.out.println("Результат: " + arabicToRoman(result));
+        int i = 0;
+        while (number > 0 && i < arabicNumbers.length) {
+            if (number >= arabicNumbers[i]) {
+                number -= arabicNumbers[i];
+                result.append(romanCharacters[i]);
             } else {
-                System.out.println("Результат: " + result);
+                i++;
             }
         }
+
+        return result.toString();
     }
 }
